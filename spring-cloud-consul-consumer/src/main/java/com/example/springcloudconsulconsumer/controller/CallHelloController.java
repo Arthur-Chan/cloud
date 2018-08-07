@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,12 +18,12 @@ public class CallHelloController {
     private LoadBalancerClient loadBalancer;
 
     @RequestMapping("/call")
-    public Object call() {
+    public Object call(@RequestParam String key) {
         Map<String, Object> map = new HashMap<>();
         ServiceInstance serviceInstance = loadBalancer.choose("service-producer");
         map.put("serviceUri", serviceInstance.getUri());
         map.put("serviceId", serviceInstance.getServiceId());
-        Object callServiceResult = new RestTemplate().getForObject(serviceInstance.getUri().toString() + "/hello", Object.class);
+        Object callServiceResult = new RestTemplate().getForObject(serviceInstance.getUri().toString() + "/getRedis?stringKey={key}", Object.class, key);
         map.put("invokeResult", callServiceResult);
         return map;
     }
